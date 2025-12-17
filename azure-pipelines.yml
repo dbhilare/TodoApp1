@@ -38,7 +38,7 @@ steps:
     environmentServiceNameAzureRM: 'azurerm-sc-terraform'
     workingDirectory: '$(System.DefaultWorkingDirectory)'
     commandOptions: >
-      -var="ssh_public_key_path=$(sshkey.secureFilePath)"
+      -var ssh_public_key_path=$(sshkey.secureFilePath)
 
 # Terraform apply
 - task: TerraformTaskV4@4
