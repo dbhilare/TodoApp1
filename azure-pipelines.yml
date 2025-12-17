@@ -6,7 +6,7 @@ pool:
 
 variables:
   terraformVersion: '1.6.6'
-  TF_LOG: TRACE
+  # TF_LOG: TRACE
   TF_VAR_ssh_public_key: $(ssh_public_key)
 
 steps:
@@ -27,29 +27,29 @@ steps:
 #     Write-Host "##vso[task.setvariable variable=TF_VAR_ssh_public_key]$key"
 #   displayName: 'Set SSH public key for Terraform'
 
-- powershell: |
-    $key = Get-Content "$(sshkey.secureFilePath)" -Raw
+# - powershell: |
+#     $key = Get-Content "$(sshkey.secureFilePath)" -Raw
 
-    # Remove BOM if present
-    $key = $key -replace "^\uFEFF", ""
+#     # Remove BOM if present
+#     $key = $key -replace "^\uFEFF", ""
 
-    # Collapse to a single line (Azure requires one line)
-    $key = $key -replace "`r", "" -replace "`n", ""
+#     # Collapse to a single line (Azure requires one line)
+#     $key = $key -replace "`r", "" -replace "`n", ""
 
-    # Trim spaces
-    $key = $key.Trim()
+#     # Trim spaces
+#     $key = $key.Trim()
 
-    Write-Host "Final SSH key:"
-    Write-Host $key.Substring(0,20)
+#     Write-Host "Final SSH key:"
+#     Write-Host $key.Substring(0,20)
 
-    Write-Host "##vso[task.setvariable variable=TF_VAR_ssh_public_key]$key"
-  displayName: 'Sanitize and set SSH public key'
+#     Write-Host "##vso[task.setvariable variable=TF_VAR_ssh_public_key]$key"
+#   displayName: 'Sanitize and set SSH public key'
 
-- powershell: |
-    Write-Host "=== DEBUG SSH KEY ==="
-    Write-Host "Length:" "$(TF_VAR_ssh_public_key)".Length
-    Write-Host "Prefix:" "$(TF_VAR_ssh_public_key)".Substring(0,15)
-  displayName: 'DEBUG – SSH key value'
+# - powershell: |
+#     Write-Host "=== DEBUG SSH KEY ==="
+#     Write-Host "Length:" "$(TF_VAR_ssh_public_key)".Length
+#     Write-Host "Prefix:" "$(TF_VAR_ssh_public_key)".Substring(0,15)
+#   displayName: 'DEBUG – SSH key value'
 
 # -----------------------------------
 # Install Terraform
