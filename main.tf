@@ -83,11 +83,11 @@ resource "azurerm_network_interface" "nic" {
   }
 }
 
+
 resource "azurerm_network_interface_security_group_association" "nsg_assoc" {
   network_interface_id      = azurerm_network_interface.nic.id
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
-
 
 
 # -----------------------------
@@ -95,18 +95,37 @@ resource "azurerm_network_interface_security_group_association" "nsg_assoc" {
 # -----------------------------
 resource "azurerm_linux_virtual_machine" "vm" {
   name                = "vm1"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
+  resource_group_name = azurerm_resource_group.source_rg.name
+  location            = azurerm_resource_group.source_rg.location
   size                = "Standard_B2s"
-  admin_username      = "azureuser"
+
+  admin_username = "azureuser"
+
+  network_interface_ids = [
+    azurerm_network_interface.vm_nic.id
+  ]
+
+  disable_password_authentication = true
 
   admin_ssh_key {
     username   = "azureuser"
     public_key = var.ssh_public_key
   }
 
-  disable_password_authentication = true
+  os_disk {
+    name                 = "vm1-osdisk"
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
+    version   = "latest"
+  }
 }
+
 
 /*
 resource "azurerm_linux_virtual_machine" "vm" {
