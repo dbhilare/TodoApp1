@@ -16,18 +16,24 @@ steps:
   inputs:
     terraformVersion: $(terraformversion)
 
+# RSA file
+- task: DownloadSecureFile@1
+  name: sshkey
+  inputs:
+    secureFile: id_rsa.pub
+
 # Terraform Init
 - task: TerraformTaskV4@4
   displayName: 'Terraform Init wa'
   inputs:
-   provider: 'azurerm'
-   command: 'init'
-   backendServiceArm: 'azurerm-sc-terraform'
-   backendAzureRmResourceGroupName: 'tfstate-rg'
-   backendAzureRmStorageAccountName: 'tfstateazmig'
-   backendAzureRmContainerName: 'tfstate'
-   backendAzureRmKey: 'todoapp.tfstate'
-   workingDirectory: '$(System.DefaultWorkingDirectory)'
+    provider: 'azurerm'
+    command: 'init'
+    backendServiceArm: 'azurerm-sc-terraform'
+    backendAzureRmResourceGroupName: 'tfstate-rg'
+    backendAzureRmStorageAccountName: 'tfstateazmig'
+    backendAzureRmContainerName: 'tfstate'
+    backendAzureRmKey: 'todoapp.tfstate'
+    workingDirectory: '$(System.DefaultWorkingDirectory)'
 
 # Terraform plan
 - task: TerraformTaskV4@4
