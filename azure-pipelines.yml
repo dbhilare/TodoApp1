@@ -2,44 +2,42 @@ trigger:
 - main
 
 pool:
-  #name: 'terraform-vm-agents'
-  #name: 'terraform-local'
   vmImage: 'windows-latest'
 
 variables:
   terraformVersion: '1.6.6'
 
 steps:
-# Install Terraform
-- task: TerraformInstaller@1
-  displayName: 'Install terraform wa'
-  inputs:
-    terraformVersion: $(terraformversion)
-
-- task: PowerShell@2
-    $key = Get-Content "$(sshkey.secureFilePath)" -Raw
-    $key = $key.Trim()
-    #Write-Host "##vso[task.setvariable variable=TF_VAR_ssh_public_key]$key"
-    displayName: 'Set SSH public key for Terraform'
-
-- task: PowerShell@2
-  inputs:
-    targetType: 'inline'
-    script: |
-      $key = Get-Content "$(sshkey.secureFilePath)" -Raw
-          $key = $key.Trim()
-          Write-Host "##vso[task.setvariable variable=TF_VAR_ssh_public_key]$key"
-          displayName: 'Set SSH public key for Terraform'
-
-# RSA file
+# -----------------------------------
+# Download SSH public key (secure file)
+# -----------------------------------
 - task: DownloadSecureFile@1
   name: sshkey
   inputs:
     secureFile: id_rsa.pub
 
+# -----------------------------------
+# Read SSH key & expose to Terraform
+# -----------------------------------
+- powershell: |
+    $key = Get-Content "$(sshkey.secureFilePath)" -Raw
+    $key = $key.Trim()
+    Write-Host "##vso[task.setvariable variable=TF_VAR_ssh_public_key]$key"
+  displayName: 'Set SSH public key for Terraform'
+
+# -----------------------------------
+# Install Terraform
+# -----------------------------------
+- task: TerraformInstaller@1
+  displayName: 'Install Terraform'
+  inputs:
+    terraformVersion: $(terraformVersion)
+
+# -----------------------------------
 # Terraform Init
+# -----------------------------------
 - task: TerraformTaskV4@4
-  displayName: 'Terraform Init wa'
+  displayName: 'Terraform Init'
   inputs:
     provider: 'azurerm'
     command: 'init'
@@ -50,29 +48,25 @@ steps:
     backendAzureRmKey: 'todoapp.tfstate'
     workingDirectory: '$(System.DefaultWorkingDirectory)'
 
-# Terraform plan
+# -----------------------------------
+# Terraform Plan
+# -----------------------------------
 - task: TerraformTaskV4@4
-  displayName: 'Terraform Plan wa'
+  displayName: 'Terraform Plan'
   inputs:
     provider: 'azurerm'
     command: 'plan'
     environmentServiceNameAzureRM: 'azurerm-sc-terraform'
     workingDirectory: '$(System.DefaultWorkingDirectory)'
-    commandOptions: >
-      -var ssh_public_key_path=$(sshkey.secureFilePath)
 
-# Terraform apply
+# -----------------------------------
+# Terraform Apply
+# -----------------------------------
 - task: TerraformTaskV4@4
-  displayName: 'Terraform Apply wa'
+  displayName: 'Terraform Apply'
   inputs:
     provider: 'azurerm'
     command: 'apply'
     environmentServiceNameAzureRM: 'azurerm-sc-terraform'
     commandOptions: '-auto-approve'
     workingDirectory: '$(System.DefaultWorkingDirectory)'
-    # commandOptions: >
-    #   -auto-approve
-    #   -var="ssh_public_key_path=$(sshkey.secureFilePath)"
-
-
-
