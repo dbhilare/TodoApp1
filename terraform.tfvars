@@ -1,0 +1,6 @@
+resource_group_name = "react-ui-rg"
+location            = "Central India"
+vm_name             = "react-ui-vm"
+admin_username      = "azureuser"
+ssh_public_key      = "SHA256:RUwzt+7mU1iZ6pzfg1ypjLVPGoYeHc2lsehQoNkAA5w azuread/devendrabhilare@WIN-8CF5FFFBE7D"
+ssh_public_key_path = "C:/Users/DevendraBhilare/.ssh/id_rsa.pub"
