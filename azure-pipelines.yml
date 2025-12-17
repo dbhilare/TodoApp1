@@ -16,6 +16,21 @@ steps:
   inputs:
     terraformVersion: $(terraformversion)
 
+- task: PowerShell@2
+    $key = Get-Content "$(sshkey.secureFilePath)" -Raw
+    $key = $key.Trim()
+    #Write-Host "##vso[task.setvariable variable=TF_VAR_ssh_public_key]$key"
+    displayName: 'Set SSH public key for Terraform'
+
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      $key = Get-Content "$(sshkey.secureFilePath)" -Raw
+          $key = $key.Trim()
+          Write-Host "##vso[task.setvariable variable=TF_VAR_ssh_public_key]$key"
+          displayName: 'Set SSH public key for Terraform'
+
 # RSA file
 - task: DownloadSecureFile@1
   name: sshkey
