@@ -7,15 +7,16 @@ pool:
 variables:
   terraformVersion: '1.6.6'
   TF_LOG: TRACE
+  TF_VAR_ssh_public_key: $(ssh_public_key)
 
 steps:
 # -----------------------------------
 # Download SSH public key (secure file)
 # -----------------------------------
-- task: DownloadSecureFile@1
-  name: sshkey
-  inputs:
-    secureFile: id_rsa.pub
+# - task: DownloadSecureFile@1
+#   name: sshkey
+#   inputs:
+#     secureFile: id_rsa.pub
 
 # -----------------------------------
 # Read SSH key & expose to Terraform
