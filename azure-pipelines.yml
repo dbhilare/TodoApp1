@@ -49,8 +49,9 @@ steps:
     environmentServiceNameAzureRM: 'azurerm-sc-terraform'
     commandOptions: '-auto-approve'
     workingDirectory: '$(System.DefaultWorkingDirectory)'
-    commandOptions: >
-      -auto-approve
-      -var="ssh_public_key_path=$(sshkey.secureFilePath)"
+    # commandOptions: >
+    #   -auto-approve
+    #   -var="ssh_public_key_path=$(sshkey.secureFilePath)"
+
 
 
