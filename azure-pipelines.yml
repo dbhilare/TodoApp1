@@ -83,16 +83,16 @@ steps:
           sudo mkdir -p /var/www/html
           sudo chmod -R 755 /var/www
 
-          # Enable Managed Identity on VM
-          az vm identity assign \
-            --resource-group react-ui-rg-auto \
-            --name vm1
+          # # Enable Managed Identity on VM
+          # az vm identity assign \
+          #   --resource-group react-ui-rg-auto \
+          #   --name vm1
 
-          # Grant Storage access
-          az role assignment create \
-            --assignee dcf20d09-1838-4d71-8804-0fc8d2bf935d \
-            --role "Storage Blob Data Reader" \
-            --scope /subscriptions/e035c6a6-7703-4c41-8736-d7668db3a49b/resourceGroups/react-ui-rg-auto/providers/Microsoft.Storage/storageAccounts/tfstateazmig
+          # # Grant Storage access
+          # az role assignment create \
+          #   --assignee dcf20d09-1838-4d71-8804-0fc8d2bf935d \
+          #   --role "Storage Blob Data Reader" \
+          #   --scope /subscriptions/e035c6a6-7703-4c41-8736-d7668db3a49b/resourceGroups/react-ui-rg-auto/providers/Microsoft.Storage/storageAccounts/tfstateazmig
 
           # Download React build from Azure Storage
           az storage blob download-batch \
