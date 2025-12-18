@@ -64,7 +64,7 @@ steps:
     scriptLocation: inlineScript
     inlineScript: |
       az vm run-command invoke \
-        --resource-group react-ui-rg \
+        --resource-group react-ui-rg-auto \
         --name vm1 \
         --command-id RunShellScript \
         --scripts "
