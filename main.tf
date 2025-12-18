@@ -131,9 +131,11 @@ resource "azurerm_linux_virtual_machine" "vm" {
   }
 }
 
-#Assign Storage Blob Data Reader role (Terraform)
+# -----------------------------
+# Assign Storage Blob Data Reader to VM Identity
+# -----------------------------
 resource "azurerm_role_assignment" "vm_storage_reader" {
-  scope                = azurerm_storage_account.tfstate.id
+  scope                = data.azurerm_storage_account.tfstate.id
   role_definition_name = "Storage Blob Data Reader"
   principal_id         = azurerm_linux_virtual_machine.vm.identity[0].principal_id
 }
