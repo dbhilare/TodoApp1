@@ -1,4 +1,4 @@
-resource_group_name = "react-ui-rg"
+resource_group_name = "react-ui-rg-auto"
 location            = "Central India"
 vm_name             = "react-ui-vm"
 admin_username      = "azureuser"
