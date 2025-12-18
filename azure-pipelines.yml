@@ -72,43 +72,96 @@ steps:
         --resource-group react-ui-rg-auto \
         --name vm1 \
         --command-id RunShellScript \
-        --scripts "
+        --scripts '
+          set -e
+          set -x
+
+          echo "=== Installing prerequisites ==="
           sudo apt update -y
+          sudo apt install -y curl unzip
 
-          # Install Node.js
-          curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-          sudo apt install -y nodejs
+          echo "=== Installing Azure CLI ==="
+          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
-          # Install Nginx
+          echo "=== Login using Managed Identity ==="
+          az login --identity
+
+          echo "=== Installing Nginx ==="
           sudo apt install -y nginx
           sudo systemctl enable nginx
           sudo systemctl start nginx
 
-          # Prepare web directory
-          sudo mkdir -p /var/www/html
-          sudo chmod -R 755 /var/www
+          echo "=== Downloading React build ==="
+          mkdir -p /tmp/build
 
-          # # Enable Managed Identity on VM
-          # az vm identity assign \
-          #   --resource-group react-ui-rg-auto \
-          #   --name vm1
-
-          # # Grant Storage access
-          # az role assignment create \
-          #   --assignee dcf20d09-1838-4d71-8804-0fc8d2bf935d \
-          #   --role "Storage Blob Data Reader" \
-          #   --scope /subscriptions/e035c6a6-7703-4c41-8736-d7668db3a49b/resourceGroups/react-ui-rg-auto/providers/Microsoft.Storage/storageAccounts/tfstateazmig
-
-          # Download React build from Azure Storage
           az storage blob download-batch \
             --account-name tfstateazmig \
             --source tfstate \
             --destination /tmp/build \
-            --pattern 'build/*' \
+            --pattern "build/*" \
             --auth-mode login
 
-          # Deploy app
-          sudo cp -r /tmp/build/* /var/www/html/
-          "
+          echo "=== Verifying downloaded files ==="
+          ls -R /tmp/build
 
+          echo "=== Deploying to Nginx ==="
+          sudo rm -rf /var/www/html/*
+          sudo cp -r /tmp/build/build/* /var/www/html/
+
+          sudo chown -R www-data:www-data /var/www/html
+          sudo chmod -R 755 /var/www/html
+
+          echo "=== Deployment completed ==="
+        '
+
+
+# - task: AzureCLI@2
+#   displayName: Configure VM & Deploy React App
+#   inputs:
+#     azureSubscription: azurerm-sc-terraform
+#     scriptType: bash
+#     scriptLocation: inlineScript
+#     inlineScript: |
+#       az vm run-command invoke \
+#         --resource-group react-ui-rg-auto \
+#         --name vm1 \
+#         --command-id RunShellScript \
+#         --scripts "
+#           sudo apt update -y
+
+#           # Install Node.js
+#           curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+#           sudo apt install -y nodejs
+
+#           # Install Nginx
+#           sudo apt install -y nginx
+#           sudo systemctl enable nginx
+#           sudo systemctl start nginx
+
+#           # Prepare web directory
+#           sudo mkdir -p /var/www/html
+#           sudo chmod -R 755 /var/www
+
+#           # # Enable Managed Identity on VM
+#           # az vm identity assign \
+#           #   --resource-group react-ui-rg-auto \
+#           #   --name vm1
+
+#           # # Grant Storage access
+#           # az role assignment create \
+#           #   --assignee dcf20d09-1838-4d71-8804-0fc8d2bf935d \
+#           #   --role "Storage Blob Data Reader" \
+#           #   --scope /subscriptions/e035c6a6-7703-4c41-8736-d7668db3a49b/resourceGroups/react-ui-rg-auto/providers/Microsoft.Storage/storageAccounts/tfstateazmig
+
+#           # Download React build from Azure Storage
+#           az storage blob download-batch \
+#             --account-name tfstateazmig \
+#             --source tfstate \
+#             --destination /tmp/build \
+#             --pattern 'build/*' \
+#             --auth-mode login
+
+#           # Deploy app
+#           sudo cp -r /tmp/build/* /var/www/html/
+#           "
 
