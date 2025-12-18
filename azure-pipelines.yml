@@ -93,4 +93,4 @@ steps:
 
           # Deploy app
           sudo cp -r /tmp/build/* /var/www/html/
-
+          "
