@@ -9,7 +9,7 @@ terraform {
     resource_group_name  = "tfstate-rg"
     storage_account_name = "tfstateazmig"
     container_name       = "tfstate"
-    key                  = "todoapp.tfstate"
+    key                  = "todoappauto.tfstate"
   }
 }
 
