@@ -56,6 +56,11 @@ steps:
     commandOptions: '-auto-approve'
     workingDirectory: '$(System.DefaultWorkingDirectory)'
 
+- script: |
+    echo "Waiting 60 seconds for Managed Identity RBAC propagation..."
+    sleep 60
+  displayName: Wait for RBAC propagation
+
 - task: AzureCLI@2
   displayName: Configure VM & Deploy React App
   inputs:
