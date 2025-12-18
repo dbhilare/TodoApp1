@@ -125,42 +125,18 @@ resource "azurerm_linux_virtual_machine" "vm" {
     sku       = "22_04-lts"
     version   = "latest"
   }
+
+  identity {
+    type = "SystemAssigned"
+  }
+}
+
+#Assign Storage Blob Data Reader role (Terraform)
+resource "azurerm_role_assignment" "vm_storage_reader" {
+  scope                = azurerm_storage_account.tfstate.id
+  role_definition_name = "Storage Blob Data Reader"
+  principal_id         = azurerm_linux_virtual_machine.vm.identity[0].principal_id
 }
 
 
-/*
-resource "azurerm_linux_virtual_machine" "vm" {
-  name                = var.vm_name
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
-  size                = "Standard_B2s"
-  admin_username      = var.admin_username
-  network_interface_ids = [
-    azurerm_network_interface.nic.id
-  ]
-
-  admin_ssh_key {
-  username   = "azureuser"
-  public_key = var.ssh_public_key
-  }
-
-  
-  admin_ssh_key {
-    username   = var.admin_username
-    public_key = var.ssh_public_key
-  }
-    
-  os_disk {
-    caching              = "ReadWrite"
-    storage_account_type = "Standard_LRS"
-  }
-
-  source_image_reference {
-    publisher = "Canonical"
-    offer     = "0001-com-ubuntu-server-jammy"
-    sku       = "22_04-lts"
-    version   = "latest"
-  }
-}
-*/
 
