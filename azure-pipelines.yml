@@ -54,3 +54,42 @@ steps:
     environmentServiceNameAzureRM: 'azurerm-sc-terraform'
     commandOptions: '-auto-approve'
     workingDirectory: '$(System.DefaultWorkingDirectory)'
+
+- task: AzureCLI@2
+  displayName: Configure VM & Deploy React App
+  inputs:
+    azureSubscription: azurerm-sc-terraform
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
+      az vm run-command invoke \
+        --resource-group react-ui-rg \
+        --name vm1 \
+        --command-id RunShellScript \
+        --scripts "
+          sudo apt update -y
+
+          # Install Node.js
+          curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+          sudo apt install -y nodejs
+
+          # Install Nginx
+          sudo apt install -y nginx
+          sudo systemctl enable nginx
+          sudo systemctl start nginx
+
+          # Prepare web directory
+          sudo mkdir -p /var/www/html
+          sudo chmod -R 755 /var/www
+
+          # Download React build from Azure Storage
+          az storage blob download-batch \
+            --account-name tfstateazmig \
+            --source tfstate \
+            --destination /tmp/build \
+            --pattern 'build/*' \
+            --auth-mode login
+
+          # Deploy app
+          sudo cp -r /tmp/build/* /var/www/html/
+
