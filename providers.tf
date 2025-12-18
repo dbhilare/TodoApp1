@@ -18,3 +18,10 @@ provider "azurerm" {
   subscription_id = "e035c6a6-7703-4c41-8736-d7668db3a49b"
 }
 
+# -----------------------------
+# Existing Storage Account (Data Source)
+# -----------------------------
+data "azurerm_storage_account" "tfstate" {
+  name                = "tfstateazmig"
+  resource_group_name = "tfstate-rg"
+}
