@@ -2,7 +2,6 @@ trigger:
 - main
 
 pool:
-  # vmImage: 'windows-latest'
   vmImage: 'ubuntu-latest'
 
 variables:
@@ -34,6 +33,21 @@ steps:
     workingDirectory: '$(System.DefaultWorkingDirectory)'
 
 # -----------------------------------
+# Install tfsec
+# -----------------------------------
+- bash: |
+    curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
+    tfsec --version
+  displayName: 'Install tfsec'
+
+# -----------------------------------
+# Run tfsec security scan
+# -----------------------------------
+- bash: |
+    tfsec . --soft-fail
+  displayName: 'Run tfsec (soft-fail)'
+
+# -----------------------------------
 # Terraform Plan
 # -----------------------------------
 - task: TerraformTaskV4@4
@@ -56,13 +70,19 @@ steps:
     commandOptions: '-auto-approve'
     workingDirectory: '$(System.DefaultWorkingDirectory)'
 
+# -----------------------------------
+# Wait for RBAC propagation
+# -----------------------------------
 - script: |
     echo "Waiting 60 seconds for Managed Identity RBAC propagation..."
     sleep 60
-  displayName: Wait for RBAC propagation
+  displayName: 'Wait for RBAC propagation'
 
+# -----------------------------------
+# Configure VM & Deploy React App
+# -----------------------------------
 - task: AzureCLI@2
-  displayName: Configure VM & Deploy React App
+  displayName: 'Configure VM & Deploy React App'
   inputs:
     azureSubscription: azurerm-sc-terraform
     scriptType: bash
@@ -113,55 +133,3 @@ steps:
 
           echo "=== Deployment completed ==="
         '
-
-
-# - task: AzureCLI@2
-#   displayName: Configure VM & Deploy React App
-#   inputs:
-#     azureSubscription: azurerm-sc-terraform
-#     scriptType: bash
-#     scriptLocation: inlineScript
-#     inlineScript: |
-#       az vm run-command invoke \
-#         --resource-group react-ui-rg-auto \
-#         --name vm1 \
-#         --command-id RunShellScript \
-#         --scripts "
-#           sudo apt update -y
-
-#           # Install Node.js
-#           curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-#           sudo apt install -y nodejs
-
-#           # Install Nginx
-#           sudo apt install -y nginx
-#           sudo systemctl enable nginx
-#           sudo systemctl start nginx
-
-#           # Prepare web directory
-#           sudo mkdir -p /var/www/html
-#           sudo chmod -R 755 /var/www
-
-#           # # Enable Managed Identity on VM
-#           # az vm identity assign \
-#           #   --resource-group react-ui-rg-auto \
-#           #   --name vm1
-
-#           # # Grant Storage access
-#           # az role assignment create \
-#           #   --assignee dcf20d09-1838-4d71-8804-0fc8d2bf935d \
-#           #   --role "Storage Blob Data Reader" \
-#           #   --scope /subscriptions/e035c6a6-7703-4c41-8736-d7668db3a49b/resourceGroups/react-ui-rg-auto/providers/Microsoft.Storage/storageAccounts/tfstateazmig
-
-#           # Download React build from Azure Storage
-#           az storage blob download-batch \
-#             --account-name tfstateazmig \
-#             --source tfstate \
-#             --destination /tmp/build \
-#             --pattern 'build/*' \
-#             --auth-mode login
-
-#           # Deploy app
-#           sudo cp -r /tmp/build/* /var/www/html/
-#           "
-
